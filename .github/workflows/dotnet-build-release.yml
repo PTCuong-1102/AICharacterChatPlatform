@@ -62,16 +62,13 @@ jobs:
       if: runner.os != 'Windows'
       run: |
         if ! grep -q "RuntimeIdentifiers" AICharacterChat.UI/AICharacterChat.UI.csproj; then
-          sed -i.bak 's|</PropertyGroup>|    <RuntimeIdentifiers>win-x64;linux-x64;osx-x64;osx-arm64</RuntimeIdentifiers>\
-  </PropertyGroup>|' AICharacterChat.UI/AICharacterChat.UI.csproj
+          sed -i.bak 's|</PropertyGroup>|    <RuntimeIdentifiers>win-x64;linux-x64;osx-x64;osx-arm64</RuntimeIdentifiers>\n  </PropertyGroup>|' AICharacterChat.UI/AICharacterChat.UI.csproj
         fi
         if ! grep -q "RuntimeIdentifiers" AICharacterChat.Data/AICharacterChat.Data.csproj; then
-          sed -i.bak 's|</PropertyGroup>|    <RuntimeIdentifiers>win-x64;linux-x64;osx-x64;osx-arm64</RuntimeIdentifiers>\
-  </PropertyGroup>|' AICharacterChat.Data/AICharacterChat.Data.csproj
+          sed -i.bak 's|</PropertyGroup>|    <RuntimeIdentifiers>win-x64;linux-x64;osx-x64;osx-arm64</RuntimeIdentifiers>\n  </PropertyGroup>|' AICharacterChat.Data/AICharacterChat.Data.csproj
         fi
         if ! grep -q "RuntimeIdentifiers" AICharacterChat.Business/AICharacterChat.Business.csproj; then
-          sed -i.bak 's|</PropertyGroup>|    <RuntimeIdentifiers>win-x64;linux-x64;osx-x64;osx-arm64</RuntimeIdentifiers>\
-  </PropertyGroup>|' AICharacterChat.Business/AICharacterChat.Business.csproj
+          sed -i.bak 's|</PropertyGroup>|    <RuntimeIdentifiers>win-x64;linux-x64;osx-x64;osx-arm64</RuntimeIdentifiers>\n  </PropertyGroup>|' AICharacterChat.Business/AICharacterChat.Business.csproj
         fi
 
     - name: Create appsettings.json
