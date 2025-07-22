@@ -4,17 +4,18 @@ name: .NET Build, Pack and Release
 # Điều kiện để kích hoạt workflow
 on:
   push:
-    branches: [ "main" ] # Chạy khi có push lên nhánh main
+    branches: [ "main" ]
   pull_request:
-    branches: [ "main" ] # Chạy khi có pull request vào nhánh main
+    branches: [ "main" ]
 
 jobs:
-  build-and-release:
-    # Chạy workflow trên các hệ điều hành khác nhau để build ứng dụng đa nền tảng
+  build:
+    # Cấu hình chiến lược build
     strategy:
+      # Quan trọng: Cho phép các job khác tiếp tục chạy dù có một job bị lỗi.
+      # Hữu ích khi gặp lỗi mạng tạm thời trên một OS.
+      fail-fast: false
       matrix:
-        # Định nghĩa các OS và tên file tương ứng
-        # rid (Runtime Identifier) là mã định danh nền tảng của .NET
         include:
           - os: windows-latest
             rid: win-x64
@@ -29,21 +30,41 @@ jobs:
             rid: osx-arm64 # Dành cho máy Mac dùng chip Apple Silicon
             output_name: AICharacterChat-osx-arm64
             
-    # Môi trường để chạy job, lấy từ ma trận ở trên
+    # Môi trường để chạy job
     runs-on: ${{ matrix.os }}
 
     steps:
-    # Step 1: Checkout mã nguồn từ repository
+    # Step 1: Checkout mã nguồn
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    # Step 2: Cài đặt .NET SDK phiên bản 8.0
+    # Step 2: Cài đặt .NET SDK
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 8.0.x
 
-    # Step 3: Tạo file appsettings.json từ GitHub Secret
+    # Step 3: Thêm bộ đệm cho các gói NuGet
+    # Giúp tăng tốc độ build và tránh lỗi do mạng
+    - name: Cache NuGet packages
+      uses: actions/cache@v4
+      with:
+        path: ~/.nuget/packages
+        # Tạo key cache dựa trên OS và hash của các file project
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+        restore-keys: |
+          ${{ runner.os }}-nuget-
+
+    # Step 4: Sửa lỗi NETSDK1047 bằng cách thêm RuntimeIdentifiers
+    # Bước này tự động thêm các nền tảng build vào file project của UI
+    - name: Add RuntimeIdentifiers to the project
+      run: |
+        sed -i '' 's|</PropertyGroup>|  <RuntimeIdentifiers>win-x64;linux-x64;osx-x64;osx-arm64</RuntimeIdentifiers>\n</PropertyGroup>|' AICharacterChat.UI/AICharacterChat.UI.csproj
+      shell: bash
+      # Dòng lệnh trên sử dụng `sed` để tìm dòng </PropertyGroup> cuối cùng và chèn dòng RuntimeIdentifiers vào trước nó.
+      # Điều này đảm bảo dotnet restore sẽ chuẩn bị tài nguyên cho tất cả các nền tảng.
+
+    # Step 5: Tạo file appsettings.json từ GitHub Secret
     - name: Create appsettings.json
       run: |
         echo '{
@@ -57,16 +78,15 @@ jobs:
         }' > AICharacterChat.UI/appsettings.json
       shell: bash
 
-    # Step 4: Khôi phục các gói NuGet, chỉ định rõ runtime để tránh xung đột
+    # Step 6: Khôi phục các gói NuGet
     - name: Restore dependencies
-      run: dotnet restore AICharacterChatPlatform.sln --runtime ${{ matrix.rid }}
+      run: dotnet restore AICharacterChatPlatform.sln
 
-    # Step 5: Đóng gói ứng dụng (Publish)
-    # Lệnh này sẽ tự động build và tạo ra một thư mục chứa tất cả các file cần thiết
+    # Step 7: Đóng gói ứng dụng (Publish)
     - name: Publish Application
       run: dotnet publish AICharacterChat.UI/AICharacterChat.UI.csproj --configuration Release --runtime ${{ matrix.rid }} --self-contained true -p:PublishSingleFile=true -o ./publish/${{ matrix.output_name }} --no-restore
       
-    # Step 6: Nén thư mục đã publish thành file .zip (cho Windows) hoặc .tar.gz (cho Linux/macOS)
+    # Step 8: Nén các file đã build
     - name: Archive production artifacts (Windows)
       if: runner.os == 'Windows'
       run: Compress-Archive -Path ./publish/${{ matrix.output_name }}/* -DestinationPath ./publish/${{ matrix.output_name }}.zip
@@ -75,7 +95,7 @@ jobs:
       if: runner.os != 'Windows'
       run: tar -czvf ./publish/${{ matrix.output_name }}.tar.gz -C ./publish/${{ matrix.output_name }}/ .
       
-    # Step 7: Tải lên các file đã nén như một "artifact" của workflow
+    # Step 9: Tải lên các file build dưới dạng artifact
     - name: Upload build artifact
       uses: actions/upload-artifact@v4
       with:
@@ -84,9 +104,9 @@ jobs:
 
   # Job này sẽ chạy sau khi tất cả các job build hoàn tất
   create-release:
-    # Yêu cầu phải chạy sau job 'build-and-release'
-    needs: build-and-release
-    # Chỉ chạy khi có push trực tiếp vào nhánh `main` (không chạy cho pull request)
+    # Yêu cầu phải chạy sau job 'build'
+    needs: build
+    # Chỉ chạy khi có push trực tiếp vào nhánh `main`
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
@@ -100,9 +120,7 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          # Tự động tạo các bản nháp release, bạn có thể vào chỉnh sửa và publish sau
           draft: true
-          # Tự động tạo changelog dựa trên các commit
           generate_release_notes: true
           # Đính kèm tất cả các file từ các thư mục artifact
           files: |
