@@ -1,11 +1,11 @@
 # AI Character Chat Platform
 
-Nền tảng Chat với Nhân vật AI sử dụng AvaloniaUI, .NET 8, Entity Framework Core và Google Gemini API.
+Nền tảng Chat với Nhân vật AI sử dụng AvaloniaUI, .NET 8, Entity Framework Core, SQL Server và Google Gemini 2.0 Flash API.
 
 ## Tính năng chính
 
 - **Quản lý nhân vật AI**: Tạo, chỉnh sửa và xóa các nhân vật AI với tính cách riêng biệt
-- **Chat thông minh**: Trò chuyện với các nhân vật AI được hỗ trợ bởi Google Gemini API
+- **Chat thông minh**: Trò chuyện với các nhân vật AI được hỗ trợ bởi Google Gemini 2.0 Flash API
 - **Lịch sử hội thoại**: Lưu trữ và quản lý các cuộc hội thoại
 - **Giao diện hiện đại**: Sử dụng AvaloniaUI với MVVM pattern
 - **Đa nền tảng**: Hỗ trợ Windows, Linux và macOS
@@ -35,15 +35,17 @@ AICharacterChatPlatform/
 - **.NET 8**: Framework chính
 - **AvaloniaUI**: Cross-platform UI framework
 - **Entity Framework Core**: ORM cho database
-- **SQLite**: Database engine
-- **Google Gemini API**: AI language model
+- **SQL Server**: Database engine với LocalDB support
+- **Google Gemini 2.0 Flash**: AI language model tiên tiến
 - **MVVM Pattern**: Kiến trúc giao diện
 - **Dependency Injection**: Quản lý dependencies
 
 ## Yêu cầu hệ thống
 
-- .NET 8 SDK
-- Google Gemini API Key
+- **.NET 8 SDK** - Framework runtime và development tools
+- **SQL Server LocalDB** - Được cài đặt tự động với Visual Studio hoặc SQL Server Express
+- **Google Gemini API Key** - Để truy cập AI services
+- **Windows, Linux hoặc macOS** - Hỗ trợ đa nền tảng
 
 ## Cài đặt và chạy
 
@@ -54,17 +56,37 @@ git clone <repository-url>
 cd AICharacterChatPlatform
 ```
 
-### 2. Cấu hình API Key
+### 2. Cấu hình Database và API Key
 
+#### 2.1. Cấu hình SQL Server LocalDB
+Database sẽ được tạo tự động khi chạy ứng dụng. Connection string mặc định:
+```
+Server=(localdb)\mssqllocaldb;Database=AICharacterChatDb;Trusted_Connection=true;MultipleActiveResultSets=true
+```
+
+#### 2.2. Cấu hình Gemini API Key
 Chỉnh sửa file `AICharacterChat.UI/appsettings.json`:
 
 ```json
 {
+  "ConnectionStrings": {
+    "DefaultConnection": "Server=(localdb)\\mssqllocaldb;Database=AICharacterChatDb;Trusted_Connection=true;MultipleActiveResultSets=true"
+  },
   "GeminiApi": {
-    "ApiKey": "YOUR_GEMINI_API_KEY_HERE"
+    "ApiKey": "YOUR_GEMINI_API_KEY_HERE",
+    "BaseUrl": "https://generativelanguage.googleapis.com/v1beta",
+    "Model": "gemini-2.0-flash",
+    "MaxTokens": 2048,
+    "Temperature": 0.7,
+    "TopP": 0.8,
+    "TopK": 40,
+    "TimeoutSeconds": 30,
+    "MaxContextMessages": 10
   }
 }
 ```
+
+**Lưu ý**: Để lấy Gemini API Key, truy cập [Google AI Studio](https://makersuite.google.com/app/apikey)
 
 ### 3. Restore packages
 
@@ -78,12 +100,21 @@ dotnet restore
 dotnet build
 ```
 
-### 5. Chạy ứng dụng
+### 5. Áp dụng Database Migration (nếu cần)
+
+```bash
+cd AICharacterChat.Data
+dotnet ef database update
+```
+
+### 6. Chạy ứng dụng
 
 ```bash
 cd AICharacterChat.UI
 dotnet run
 ```
+
+**Lưu ý**: Khi chạy lần đầu, ứng dụng sẽ tự động tạo database và seed dữ liệu mẫu (2 nhân vật AI mặc định).
 
 ## Publish ứng dụng
 
@@ -110,7 +141,7 @@ Các file executable sẽ được tạo trong thư mục `publish/`:
    - **Mô tả**: Mô tả ngắn về nhân vật
    - **Avatar URL**: Link ảnh đại diện (tùy chọn)
    - **System Prompt**: Định nghĩa tính cách và cách hành xử
-4. Nhấn "Lưu" để hoàn tất
+4. Nhấn "Tạo nhân vật" để tạo mới hoặc "Cập nhật" để chỉnh sửa
 
 ### Trò chuyện
 
@@ -121,28 +152,48 @@ Các file executable sẽ được tạo trong thư mục `publish/`:
 
 ## Cấu hình nâng cao
 
-### Database
+### Database (SQL Server)
 
-Ứng dụng sử dụng SQLite database được tạo tự động tại `AICharacterChat.db`. Để thay đổi connection string, chỉnh sửa `appsettings.json`:
+Ứng dụng sử dụng **SQL Server LocalDB** với database tên `AICharacterChatDb`. Database sẽ được tạo tự động khi chạy ứng dụng lần đầu.
 
+#### Connection String mặc định:
 ```json
 {
   "ConnectionStrings": {
-    "DefaultConnection": "Data Source=your_database.db"
+    "DefaultConnection": "Server=(localdb)\\mssqllocaldb;Database=AICharacterChatDb;Trusted_Connection=true;MultipleActiveResultSets=true"
   }
 }
 ```
 
-### Gemini API
+#### Sử dụng SQL Server khác:
+Để kết nối đến SQL Server khác, thay đổi connection string:
+```json
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "Server=YOUR_SERVER;Database=AICharacterChatDb;Trusted_Connection=true;MultipleActiveResultSets=true"
+  }
+}
+```
 
-Cấu hình chi tiết cho Gemini API trong `appsettings.json`:
+Hoặc với SQL Authentication:
+```json
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "Server=YOUR_SERVER;Database=AICharacterChatDb;User Id=YOUR_USERNAME;Password=YOUR_PASSWORD;MultipleActiveResultSets=true;TrustServerCertificate=true"
+  }
+}
+```
+
+### Gemini 2.0 Flash API
+
+Ứng dụng sử dụng **Google Gemini 2.0 Flash** - model AI tiên tiến nhất hiện tại. Cấu hình chi tiết trong `appsettings.json`:
 
 ```json
 {
   "GeminiApi": {
-    "ApiKey": "your-api-key",
+    "ApiKey": "your-gemini-api-key",
     "BaseUrl": "https://generativelanguage.googleapis.com/v1beta",
-    "Model": "gemini-pro",
+    "Model": "gemini-2.0-flash",
     "MaxTokens": 2048,
     "Temperature": 0.7,
     "TopP": 0.8,
@@ -152,6 +203,13 @@ Cấu hình chi tiết cho Gemini API trong `appsettings.json`:
   }
 }
 ```
+
+#### Các tham số cấu hình:
+- **ApiKey**: API key từ Google AI Studio
+- **Model**: `gemini-2.0-flash` (khuyến nghị) hoặc `gemini-1.5-flash`
+- **Temperature**: 0.0-2.0 (độ sáng tạo của AI)
+- **MaxTokens**: Số token tối đa cho phản hồi
+- **MaxContextMessages**: Số tin nhắn context giữ lại cho cuộc trò chuyện
 
 ## Troubleshooting
 
@@ -165,8 +223,16 @@ Nếu gặp lỗi liên quan đến API key:
 ### Lỗi Database
 
 Nếu gặp lỗi database:
-1. Xóa file `AICharacterChat.db`
-2. Chạy lại ứng dụng để tạo database mới
+1. **Lỗi LocalDB**: Cài đặt SQL Server Express LocalDB
+   - Download từ [Microsoft SQL Server Express](https://www.microsoft.com/sql-server/sql-server-downloads)
+   - Hoặc cài đặt qua Visual Studio Installer
+2. **Lỗi Migration**: Chạy lại migration
+   ```bash
+   cd AICharacterChat.Data
+   dotnet ef database drop --force
+   dotnet ef database update
+   ```
+3. **Lỗi Connection**: Kiểm tra connection string trong `appsettings.json`
 
 ### Lỗi UI
 
