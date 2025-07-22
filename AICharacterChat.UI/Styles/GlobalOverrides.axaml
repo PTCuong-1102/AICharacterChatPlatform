@@ -1,0 +1,96 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    
+    <!-- GLOBAL TEXTBOX OVERRIDE STYLES - MAXIMUM PRIORITY -->
+    <!-- These styles will override ALL theme styles including FluentTheme -->
+    
+    <!-- Default TextBox state -->
+    <Style Selector="TextBox">
+        <Setter Property="Background" Value="#F5F5F5"/>
+        <Setter Property="Foreground" Value="#212121"/>
+        <Setter Property="BorderBrush" Value="#E0E0E0"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="4"/>
+        <Setter Property="Padding" Value="8"/>
+        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="CaretBrush" Value="#000000"/>
+    </Style>
+    
+    <!-- Override ALL focus states with ultra-high specificity -->
+    <Style Selector="TextBox:focus">
+        <Setter Property="Background" Value="#FFFFFF"/>
+        <Setter Property="Foreground" Value="#000000"/>
+        <Setter Property="BorderBrush" Value="#1976D2"/>
+        <Setter Property="BorderThickness" Value="2"/>
+        <Setter Property="CaretBrush" Value="#000000"/>
+    </Style>
+    
+    <!-- Focus-within state -->
+    <Style Selector="TextBox:focus-within">
+        <Setter Property="Background" Value="#FFFFFF"/>
+        <Setter Property="Foreground" Value="#000000"/>
+        <Setter Property="CaretBrush" Value="#000000"/>
+    </Style>
+    
+    <!-- Pointer over state -->
+    <Style Selector="TextBox:pointerover">
+        <Setter Property="Background" Value="#FAFAFA"/>
+        <Setter Property="Foreground" Value="#212121"/>
+    </Style>
+    
+    <!-- Multiple levels of specificity to override theme -->
+    <Style Selector="UserControl TextBox">
+        <Setter Property="Background" Value="#F5F5F5"/>
+        <Setter Property="Foreground" Value="#212121"/>
+    </Style>
+    
+    <Style Selector="UserControl TextBox:focus">
+        <Setter Property="Background" Value="#FFFFFF"/>
+        <Setter Property="Foreground" Value="#000000"/>
+        <Setter Property="BorderBrush" Value="#1976D2"/>
+    </Style>
+    
+    <Style Selector="Grid TextBox">
+        <Setter Property="Background" Value="#F5F5F5"/>
+        <Setter Property="Foreground" Value="#212121"/>
+    </Style>
+    
+    <Style Selector="Grid TextBox:focus">
+        <Setter Property="Background" Value="#FFFFFF"/>
+        <Setter Property="Foreground" Value="#000000"/>
+        <Setter Property="BorderBrush" Value="#1976D2"/>
+    </Style>
+    
+    <Style Selector="Border TextBox">
+        <Setter Property="Background" Value="#F5F5F5"/>
+        <Setter Property="Foreground" Value="#212121"/>
+    </Style>
+    
+    <Style Selector="Border TextBox:focus">
+        <Setter Property="Background" Value="#FFFFFF"/>
+        <Setter Property="Foreground" Value="#000000"/>
+        <Setter Property="BorderBrush" Value="#1976D2"/>
+    </Style>
+    
+    <!-- Force template parts to have correct colors -->
+    <Style Selector="TextBox /template/ TextPresenter#PART_TextPresenter">
+        <Setter Property="Background" Value="Transparent"/>
+    </Style>
+    
+    <Style Selector="TextBox:focus /template/ TextPresenter#PART_TextPresenter">
+        <Setter Property="Background" Value="Transparent"/>
+    </Style>
+    
+    <!-- Ultra-specific selectors to override theme template -->
+    <Style Selector="TextBox /template/ Border#PART_BorderElement">
+        <Setter Property="Background" Value="#F5F5F5"/>
+    </Style>
+    
+    <Style Selector="TextBox:focus /template/ Border#PART_BorderElement">
+        <Setter Property="Background" Value="#FFFFFF"/>
+        <Setter Property="BorderBrush" Value="#1976D2"/>
+    </Style>
+    
+    <!-- Note: Dark mode support will be handled by ThemeService programmatically -->
+    
+</Styles>

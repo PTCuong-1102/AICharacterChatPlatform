@@ -1,0 +1,60 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    
+    <!-- High specificity TextBox styles to override Fluent Theme -->
+    <Style Selector="TextBox">
+        <Setter Property="Background" Value="#F5F5F5"/>
+        <Setter Property="Foreground" Value="#212121"/>
+        <Setter Property="BorderBrush" Value="#E0E0E0"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="4"/>
+        <Setter Property="Padding" Value="8"/>
+        <Setter Property="FontSize" Value="14"/>
+    </Style>
+    
+    <!-- Critical: Override ALL focus states with high specificity -->
+    <Style Selector="TextBox:focus">
+        <Setter Property="Background" Value="#FFFFFF"/>
+        <Setter Property="Foreground" Value="#000000"/>
+        <Setter Property="BorderBrush" Value="#1976D2"/>
+        <Setter Property="BorderThickness" Value="2"/>
+    </Style>
+    
+    <!-- Override focus-within state -->
+    <Style Selector="TextBox:focus-within">
+        <Setter Property="Background" Value="#FFFFFF"/>
+        <Setter Property="Foreground" Value="#000000"/>
+    </Style>
+    
+    <!-- Override pointerover state -->
+    <Style Selector="TextBox:pointerover">
+        <Setter Property="Background" Value="#FAFAFA"/>
+        <Setter Property="Foreground" Value="#212121"/>
+    </Style>
+    
+    <!-- Force template parts to have correct colors -->
+    <Style Selector="TextBox /template/ TextPresenter#PART_TextPresenter">
+        <Setter Property="Background" Value="Transparent"/>
+    </Style>
+    
+    <Style Selector="TextBox:focus /template/ TextPresenter#PART_TextPresenter">
+        <Setter Property="Background" Value="Transparent"/>
+    </Style>
+    
+    <!-- Force caret color -->
+    <Style Selector="TextBox">
+        <Setter Property="CaretBrush" Value="#000000"/>
+    </Style>
+    
+    <!-- Override any potential theme-specific TextBox styles -->
+    <Style Selector="Border TextBox">
+        <Setter Property="Background" Value="#F5F5F5"/>
+        <Setter Property="Foreground" Value="#212121"/>
+    </Style>
+    
+    <Style Selector="Border TextBox:focus">
+        <Setter Property="Background" Value="#FFFFFF"/>
+        <Setter Property="Foreground" Value="#000000"/>
+    </Style>
+    
+</Styles>

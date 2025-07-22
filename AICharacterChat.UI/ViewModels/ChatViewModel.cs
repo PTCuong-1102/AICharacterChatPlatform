@@ -7,6 +7,7 @@ using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
 using AICharacterChat.Business.Services.Interfaces;
 using AICharacterChat.Data.Models;
+using AICharacterChat.UI.Services;
 
 namespace AICharacterChat.UI.ViewModels
 {
@@ -17,6 +18,7 @@ namespace AICharacterChat.UI.ViewModels
     {
         private readonly IChatService _chatService;
         private readonly ICharacterService _characterService;
+        private readonly ICharacterRefreshService _characterRefreshService;
         private readonly ILogger<ChatViewModel> _logger;
 
         [ObservableProperty]
@@ -49,11 +51,28 @@ namespace AICharacterChat.UI.ViewModels
         public ChatViewModel(
             IChatService chatService,
             ICharacterService characterService,
+            ICharacterRefreshService characterRefreshService,
             ILogger<ChatViewModel> logger)
         {
             _chatService = chatService;
             _characterService = characterService;
+            _characterRefreshService = characterRefreshService;
             _logger = logger;
+            
+            // Subscribe to character refresh notifications
+            _characterRefreshService.CharactersChanged += OnCharactersChanged;
+        }
+        
+        private async void OnCharactersChanged(object? sender, EventArgs e)
+        {
+            try
+            {
+                await LoadCharactersCommand.ExecuteAsync(null);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error refreshing characters after change notification");
+            }
         }
 
         [RelayCommand]

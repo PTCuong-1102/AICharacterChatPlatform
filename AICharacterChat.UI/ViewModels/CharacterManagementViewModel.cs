@@ -6,6 +6,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
 using AICharacterChat.Business.Services.Interfaces;
+using AICharacterChat.UI.Services;
 
 namespace AICharacterChat.UI.ViewModels
 {
@@ -15,6 +16,7 @@ namespace AICharacterChat.UI.ViewModels
     public partial class CharacterManagementViewModel : ViewModelBase
     {
         private readonly ICharacterService _characterService;
+        private readonly ICharacterRefreshService _characterRefreshService;
         private readonly ILogger<CharacterManagementViewModel> _logger;
 
         [ObservableProperty]
@@ -52,9 +54,11 @@ namespace AICharacterChat.UI.ViewModels
 
         public CharacterManagementViewModel(
             ICharacterService characterService,
+            ICharacterRefreshService characterRefreshService,
             ILogger<CharacterManagementViewModel> logger)
         {
             _characterService = characterService;
+            _characterRefreshService = characterRefreshService;
             _logger = logger;
         }
 
@@ -139,15 +143,21 @@ namespace AICharacterChat.UI.ViewModels
         [RelayCommand]
         private void StartNewCharacter()
         {
+            // Clear any selected character
             if (SelectedCharacter != null)
             {
                 SelectedCharacter.IsSelected = false;
+                SelectedCharacter = null; // This will trigger property change notifications
             }
 
-            SelectedCharacter = null;
+            // Ensure we're in new character mode
             IsEditing = false;
+            
+            // Clear the form
             ClearForm();
-            StatusMessage = "Nhân vật mới đã sẵn sàng";
+            
+            // Update status message
+            StatusMessage = "📝 Hãy điền thông tin nhân vật, sau đó nhấn nút '➕ Tạo nhân vật' hoặc 'NEW CHARACTER' để lưu";
         }
 
         [RelayCommand]
@@ -208,6 +218,9 @@ namespace AICharacterChat.UI.ViewModels
                     {
                         SelectedCharacter.UpdateFromModel(updatedCharacter);
                         StatusMessage = "Đã cập nhật nhân vật thành công";
+                        
+                        // Notify other ViewModels that characters have changed
+                        _characterRefreshService.NotifyCharactersChanged();
                     }
                 }
                 else
@@ -224,6 +237,9 @@ namespace AICharacterChat.UI.ViewModels
                     SelectCharacter(newCharacterViewModel);
 
                     StatusMessage = "Đã tạo nhân vật mới thành công";
+                    
+                    // Notify other ViewModels that characters have changed
+                    _characterRefreshService.NotifyCharactersChanged();
                 }
 
                 IsEditing = false;
@@ -262,6 +278,9 @@ namespace AICharacterChat.UI.ViewModels
                     }
 
                     StatusMessage = "Đã xóa nhân vật thành công";
+                    
+                    // Notify other ViewModels that characters have changed
+                    _characterRefreshService.NotifyCharactersChanged();
                 }
                 else
                 {
@@ -315,6 +334,33 @@ namespace AICharacterChat.UI.ViewModels
 
         public bool CanDelete => SelectedCharacter != null && !IsSaving;
         public bool CanEdit => SelectedCharacter != null && !IsEditing && !IsSaving;
+        public bool IsNewCharacterMode => SelectedCharacter == null;
+
+        /// <summary>
+        /// Override OnPropertyChanged to notify dependent computed properties
+        /// </summary>
+        protected override void OnPropertyChanged(System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            base.OnPropertyChanged(e);
+
+            // Notify computed properties when their dependencies change
+            switch (e.PropertyName)
+            {
+                case nameof(CharacterName):
+                case nameof(SystemPrompt):
+                case nameof(IsSaving):
+                    OnPropertyChanged(nameof(CanSave));
+                    break;
+                case nameof(SelectedCharacter):
+                    OnPropertyChanged(nameof(CanDelete));
+                    OnPropertyChanged(nameof(CanEdit));
+                    OnPropertyChanged(nameof(IsNewCharacterMode));
+                    break;
+                case nameof(IsEditing):
+                    OnPropertyChanged(nameof(CanEdit));
+                    break;
+            }
+        }
     }
 }
 

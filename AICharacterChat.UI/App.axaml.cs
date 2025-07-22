@@ -18,6 +18,7 @@ using AICharacterChat.Data.Repositories;
 using AICharacterChat.Business.Services.Interfaces;
 using AICharacterChat.Business.Services;
 using AICharacterChat.Business.Configuration;
+using AICharacterChat.UI.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace AICharacterChat.UI;
@@ -48,8 +49,8 @@ public partial class App : Application
 
                 // Database
                 services.AddDbContext<ChatDbContext>(options =>
-                    options.UseSqlServer(configuration.GetConnectionString("DefaultConnection") ?? 
-                                        "Server=(localdb)\\mssqllocaldb;Database=AICharacterChatDb;Trusted_Connection=true;MultipleActiveResultSets=true"));
+                    options.UseSqlite(configuration.GetConnectionString("DefaultConnection") ?? 
+                                        "Data Source=AICharacterChat.db"));
 
                 // Repositories
                 services.AddScoped<IUnitOfWork, UnitOfWork>();
@@ -61,6 +62,8 @@ public partial class App : Application
                 services.AddHttpClient<IGeminiApiService, GeminiApiService>();
                 services.AddScoped<IChatService, ChatService>();
                 services.AddScoped<ICharacterService, CharacterService>();
+                services.AddSingleton<IThemeService, ThemeService>();
+                services.AddSingleton<ICharacterRefreshService, CharacterRefreshService>();
 
                 // ViewModels
                 services.AddTransient<MainWindowViewModel>();
@@ -95,6 +98,16 @@ public partial class App : Application
             {
                 try
                 {
+                    // Initialize database
+                    using (var scope = _host.Services.CreateScope())
+                    {
+                        var context = scope.ServiceProvider.GetRequiredService<ChatDbContext>();
+                        await context.Database.EnsureCreatedAsync();
+                        
+                        var logger = scope.ServiceProvider.GetRequiredService<ILogger<App>>();
+                        logger.LogInformation("Database initialized successfully");
+                    }
+                    
                     await mainWindowViewModel.InitializeCommand.ExecuteAsync(null);
                 }
                 catch (Exception ex)

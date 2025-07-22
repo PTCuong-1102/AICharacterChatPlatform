@@ -1,0 +1,127 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- Modern Theme Color Palette -->
+    <!-- Primary Colors -->
+    <Color x:Key="PrimaryColor">#1976D2</Color>           <!-- Modern Blue -->
+    <Color x:Key="PrimaryLightColor">#42A5F5</Color>      <!-- Light Blue -->
+    <Color x:Key="PrimaryDarkColor">#0D47A1</Color>       <!-- Dark Blue -->
+    
+    <!-- Secondary Colors -->
+    <Color x:Key="SecondaryColor">#388E3C</Color>         <!-- Success Green -->
+    <Color x:Key="SecondaryLightColor">#66BB6A</Color>    <!-- Light Green -->
+    <Color x:Key="SecondaryDarkColor">#1B5E20</Color>     <!-- Dark Green -->
+    
+    <!-- Accent Colors -->
+    <Color x:Key="AccentColor">#FF7043</Color>            <!-- Warm Orange -->
+    <Color x:Key="AccentLightColor">#FFAB91</Color>       <!-- Light Orange -->
+    <Color x:Key="AccentDarkColor">#D84315</Color>        <!-- Dark Orange -->
+    
+    <!-- Error Colors -->
+    <Color x:Key="ErrorColor">#D32F2F</Color>            <!-- Error Red -->
+    <Color x:Key="ErrorLightColor">#EF5350</Color>       <!-- Light Red -->
+    
+    <!-- Warning Colors -->
+    <Color x:Key="WarningColor">#F57C00</Color>          <!-- Warning Orange -->
+    <Color x:Key="WarningLightColor">#FFB74D</Color>     <!-- Light Warning -->
+    
+    <!-- Surface Colors -->
+    <Color x:Key="SurfaceColor">#FFFFFF</Color>          <!-- Primary Surface -->
+    <Color x:Key="SurfaceVariantColor">#F5F5F5</Color>   <!-- Variant Surface -->
+    <Color x:Key="SurfaceTintColor">#FAFAFA</Color>      <!-- Tinted Surface -->
+    
+    <!-- Background Colors -->
+    <Color x:Key="BackgroundColor">#FAFAFA</Color>       <!-- Main Background -->
+    <Color x:Key="BackgroundSecondaryColor">#F5F5F5</Color> <!-- Secondary Background -->
+    
+    <!-- Text Colors (WCAG AA Compliant) -->
+    <Color x:Key="OnSurfaceColor">#212121</Color>        <!-- Primary Text -->
+    <Color x:Key="OnSurfaceVariantColor">#424242</Color> <!-- Secondary Text -->
+    <Color x:Key="OnSurfaceMutedColor">#757575</Color>   <!-- Muted Text -->
+    <Color x:Key="OnPrimaryColor">#FFFFFF</Color>        <!-- Text on Primary -->
+    <Color x:Key="OnSecondaryColor">#FFFFFF</Color>      <!-- Text on Secondary -->
+    <Color x:Key="OnAccentColor">#FFFFFF</Color>         <!-- Text on Accent -->
+    
+    <!-- Border Colors -->
+    <Color x:Key="OutlineColor">#E0E0E0</Color>          <!-- Primary Border -->
+    <Color x:Key="OutlineVariantColor">#EEEEEE</Color>   <!-- Variant Border -->
+    
+    <!-- Selected/Hover States -->
+    <Color x:Key="SelectedColor">#E3F2FD</Color>         <!-- Selection Background -->
+    <Color x:Key="HoverColor">#F1F8E9</Color>            <!-- Hover Background -->
+    <Color x:Key="FocusColor">#BBDEFB</Color>            <!-- Focus Indicator -->
+
+    <!-- Convert Colors to Brushes -->
+    <!-- Primary Brushes -->
+    <SolidColorBrush x:Key="PrimaryBrush" Color="{StaticResource PrimaryColor}"/>
+    <SolidColorBrush x:Key="PrimaryLightBrush" Color="{StaticResource PrimaryLightColor}"/>
+    <SolidColorBrush x:Key="PrimaryDarkBrush" Color="{StaticResource PrimaryDarkColor}"/>
+    
+    <!-- Secondary Brushes -->
+    <SolidColorBrush x:Key="SecondaryBrush" Color="{StaticResource SecondaryColor}"/>
+    <SolidColorBrush x:Key="SecondaryLightBrush" Color="{StaticResource SecondaryLightColor}"/>
+    <SolidColorBrush x:Key="SecondaryDarkBrush" Color="{StaticResource SecondaryDarkColor}"/>
+    
+    <!-- Accent Brushes -->
+    <SolidColorBrush x:Key="AccentBrush" Color="{StaticResource AccentColor}"/>
+    <SolidColorBrush x:Key="AccentLightBrush" Color="{StaticResource AccentLightColor}"/>
+    <SolidColorBrush x:Key="AccentDarkBrush" Color="{StaticResource AccentDarkColor}"/>
+    
+    <!-- Status Brushes -->
+    <SolidColorBrush x:Key="ErrorBrush" Color="{StaticResource ErrorColor}"/>
+    <SolidColorBrush x:Key="ErrorLightBrush" Color="{StaticResource ErrorLightColor}"/>
+    <SolidColorBrush x:Key="WarningBrush" Color="{StaticResource WarningColor}"/>
+    <SolidColorBrush x:Key="WarningLightBrush" Color="{StaticResource WarningLightColor}"/>
+    
+    <!-- Surface Brushes -->
+    <SolidColorBrush x:Key="SurfaceBrush" Color="{StaticResource SurfaceColor}"/>
+    <SolidColorBrush x:Key="SurfaceVariantBrush" Color="{StaticResource SurfaceVariantColor}"/>
+    <SolidColorBrush x:Key="SurfaceTintBrush" Color="{StaticResource SurfaceTintColor}"/>
+    
+    <!-- Background Brushes -->
+    <SolidColorBrush x:Key="BackgroundBrush" Color="{StaticResource BackgroundColor}"/>
+    <SolidColorBrush x:Key="BackgroundSecondaryBrush" Color="{StaticResource BackgroundSecondaryColor}"/>
+    
+    <!-- Text Brushes -->
+    <SolidColorBrush x:Key="OnSurfaceBrush" Color="{StaticResource OnSurfaceColor}"/>
+    <SolidColorBrush x:Key="OnSurfaceVariantBrush" Color="{StaticResource OnSurfaceVariantColor}"/>
+    <SolidColorBrush x:Key="OnSurfaceMutedBrush" Color="{StaticResource OnSurfaceMutedColor}"/>
+    <SolidColorBrush x:Key="OnPrimaryBrush" Color="{StaticResource OnPrimaryColor}"/>
+    <SolidColorBrush x:Key="OnSecondaryBrush" Color="{StaticResource OnSecondaryColor}"/>
+    <SolidColorBrush x:Key="OnAccentBrush" Color="{StaticResource OnAccentColor}"/>
+    
+    <!-- Border Brushes -->
+    <SolidColorBrush x:Key="OutlineBrush" Color="{StaticResource OutlineColor}"/>
+    <SolidColorBrush x:Key="OutlineVariantBrush" Color="{StaticResource OutlineVariantColor}"/>
+    
+    <!-- State Brushes -->
+    <SolidColorBrush x:Key="SelectedBrush" Color="{StaticResource SelectedColor}"/>
+    <SolidColorBrush x:Key="HoverBrush" Color="{StaticResource HoverColor}"/>
+    <SolidColorBrush x:Key="FocusBrush" Color="{StaticResource FocusColor}"/>
+
+    <!-- DARK THEME COLORS -->
+    <!-- Dark Mode Primary Colors -->
+    <Color x:Key="DarkPrimaryColor">#2196F3</Color>           <!-- Lighter blue for dark -->
+    <Color x:Key="DarkPrimaryLightColor">#64B5F6</Color>      <!-- Even lighter -->
+    <Color x:Key="DarkPrimaryDarkColor">#1565C0</Color>       <!-- Darker blue -->
+    
+    <!-- Dark Mode Surface Colors -->
+    <Color x:Key="DarkSurfaceColor">#1E1E1E</Color>           <!-- Dark surface -->
+    <Color x:Key="DarkSurfaceVariantColor">#2D2D2D</Color>    <!-- Variant surface -->
+    <Color x:Key="DarkSurfaceTintColor">#252525</Color>       <!-- Tinted surface -->
+    
+    <!-- Dark Mode Background Colors -->
+    <Color x:Key="DarkBackgroundColor">#121212</Color>        <!-- Main dark background -->
+    <Color x:Key="DarkBackgroundSecondaryColor">#1A1A1A</Color> <!-- Secondary dark background -->
+    
+    <!-- Dark Mode Text Colors -->
+    <Color x:Key="DarkOnSurfaceColor">#FFFFFF</Color>         <!-- White text -->
+    <Color x:Key="DarkOnSurfaceVariantColor">#E0E0E0</Color>  <!-- Light gray text -->
+    <Color x:Key="DarkOnSurfaceMutedColor">#BDBDBD</Color>    <!-- Muted light text -->
+    <Color x:Key="DarkOnPrimaryColor">#000000</Color>         <!-- Black text on light blue -->
+    
+    <!-- Dark Mode Border Colors -->
+    <Color x:Key="DarkOutlineColor">#404040</Color>           <!-- Dark border -->
+    <Color x:Key="DarkOutlineVariantColor">#333333</Color>    <!-- Variant dark border -->
+
+</ResourceDictionary>

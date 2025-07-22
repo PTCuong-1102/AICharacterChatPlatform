@@ -11,5 +11,17 @@
   
     <Application.Styles>
         <FluentTheme />
+        <!-- Load custom styles AFTER FluentTheme to override it -->
+        <StyleInclude Source="/Styles/TextBoxStyles.axaml"/>
+        <!-- CRITICAL: Load global overrides LAST for maximum priority -->
+        <StyleInclude Source="/Styles/GlobalOverrides.axaml"/>
     </Application.Styles>
+    
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceInclude Source="/Styles/AppTheme.axaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Application.Resources>
 </Application>

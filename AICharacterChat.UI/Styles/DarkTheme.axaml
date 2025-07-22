@@ -1,0 +1,30 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- DARK THEME OVERRIDE COLORS -->
+    
+    <!-- Primary Brushes (Dark Mode) -->
+    <SolidColorBrush x:Key="PrimaryBrush" Color="#2196F3"/>
+    <SolidColorBrush x:Key="PrimaryLightBrush" Color="#64B5F6"/>
+    <SolidColorBrush x:Key="PrimaryDarkBrush" Color="#1565C0"/>
+    
+    <!-- Surface Brushes (Dark Mode) -->
+    <SolidColorBrush x:Key="SurfaceBrush" Color="#1E1E1E"/>
+    <SolidColorBrush x:Key="SurfaceVariantBrush" Color="#2D2D2D"/>
+    <SolidColorBrush x:Key="SurfaceTintBrush" Color="#252525"/>
+    
+    <!-- Background Brushes (Dark Mode) -->
+    <SolidColorBrush x:Key="BackgroundBrush" Color="#121212"/>
+    <SolidColorBrush x:Key="BackgroundSecondaryBrush" Color="#1A1A1A"/>
+    
+    <!-- Text Brushes (Dark Mode) -->
+    <SolidColorBrush x:Key="OnSurfaceBrush" Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="OnSurfaceVariantBrush" Color="#E0E0E0"/>
+    <SolidColorBrush x:Key="OnSurfaceMutedBrush" Color="#BDBDBD"/>
+    <SolidColorBrush x:Key="OnPrimaryBrush" Color="#000000"/>
+    
+    <!-- Border Brushes (Dark Mode) -->
+    <SolidColorBrush x:Key="OutlineBrush" Color="#404040"/>
+    <SolidColorBrush x:Key="OutlineVariantBrush" Color="#333333"/>
+
+</ResourceDictionary>

@@ -16,7 +16,7 @@ namespace AICharacterChat.UI.Converters
         {
             if (value is bool isSelected && isSelected)
             {
-                return new SolidColorBrush(Color.Parse("#E8F4FD"));
+                return new SolidColorBrush(Color.Parse("#E3F2FD")); // Selected from theme
             }
             return new SolidColorBrush(Colors.Transparent);
         }
@@ -36,7 +36,15 @@ namespace AICharacterChat.UI.Converters
 
         public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
         {
-            return value != null;
+            bool result = value != null;
+            
+            // Check if we need to invert the result
+            if (parameter?.ToString()?.Equals("Invert", StringComparison.OrdinalIgnoreCase) == true)
+            {
+                result = !result;
+            }
+            
+            return result;
         }
 
         public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
@@ -57,10 +65,10 @@ namespace AICharacterChat.UI.Converters
             if (value is bool isFromUser)
             {
                 return isFromUser 
-                    ? new SolidColorBrush(Color.Parse("#3498DB"))  // User message - blue
-                    : new SolidColorBrush(Color.Parse("#ECF0F1")); // AI message - light gray
+                    ? new SolidColorBrush(Color.Parse("#1976D2"))  // User message - Primary blue
+                    : new SolidColorBrush(Color.Parse("#F5F5F5")); // AI message - Surface variant
             }
-            return new SolidColorBrush(Color.Parse("#ECF0F1"));
+            return new SolidColorBrush(Color.Parse("#F5F5F5"));
         }
 
         public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
@@ -81,10 +89,10 @@ namespace AICharacterChat.UI.Converters
             if (value is bool isFromUser)
             {
                 return isFromUser 
-                    ? new SolidColorBrush(Colors.White)           // User message - white text
-                    : new SolidColorBrush(Color.Parse("#2C3E50")); // AI message - dark text
+                    ? new SolidColorBrush(Colors.White)           // User message - white text on blue
+                    : new SolidColorBrush(Color.Parse("#212121")); // AI message - dark text on light
             }
-            return new SolidColorBrush(Color.Parse("#2C3E50"));
+            return new SolidColorBrush(Color.Parse("#212121"));
         }
 
         public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
@@ -105,10 +113,10 @@ namespace AICharacterChat.UI.Converters
             if (value is bool isFromUser)
             {
                 return isFromUser 
-                    ? new SolidColorBrush(Color.Parse("#BDC3C7"))  // User message - light gray
-                    : new SolidColorBrush(Color.Parse("#7F8C8D"));  // AI message - medium gray
+                    ? new SolidColorBrush(Color.Parse("#E1F5FE"))  // User message - very light blue
+                    : new SolidColorBrush(Color.Parse("#757575"));  // AI message - medium gray
             }
-            return new SolidColorBrush(Color.Parse("#7F8C8D"));
+            return new SolidColorBrush(Color.Parse("#757575"));
         }
 
         public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
@@ -155,6 +163,30 @@ namespace AICharacterChat.UI.Converters
                 return isEditing ? "Chỉnh sửa nhân vật" : "Thông tin nhân vật";
             }
             return "Thông tin nhân vật";
+        }
+
+        public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    /// <summary>
+    /// Converter for save button background color based on CanSave state
+    /// </summary>
+    public class BooleanToSaveButtonBackgroundConverter : IValueConverter
+    {
+        public static readonly BooleanToSaveButtonBackgroundConverter Instance = new();
+
+        public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+        {
+            if (value is bool canSave)
+            {
+                return canSave 
+                    ? new SolidColorBrush(Color.Parse("#388E3C"))  // Bright green when enabled
+                    : new SolidColorBrush(Color.Parse("#9E9E9E"));  // Gray when disabled
+            }
+            return new SolidColorBrush(Color.Parse("#9E9E9E"));
         }
 
         public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)

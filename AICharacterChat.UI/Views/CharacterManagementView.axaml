@@ -8,6 +8,14 @@
              x:Class="AICharacterChat.UI.Views.CharacterManagementView"
              x:DataType="vm:CharacterManagementViewModel">
 
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceInclude Source="/Styles/AppTheme.axaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="400"/>
@@ -15,7 +23,8 @@
         </Grid.ColumnDefinitions>
 
         <!-- Characters List Panel -->
-        <Border Grid.Column="0" Background="#ECF0F1" BorderBrush="#BDC3C7" BorderThickness="0,0,1,0">
+        <Border Grid.Column="0" Background="{DynamicResource SurfaceBrush}" 
+                BorderBrush="{DynamicResource OutlineBrush}" BorderThickness="0,0,1,0">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
@@ -25,15 +34,15 @@
                 </Grid.RowDefinitions>
 
                 <!-- Header -->
-                <Border Grid.Row="0" Background="#34495E" Padding="15">
-                    <TextBlock Text="Danh sách nhân vật" 
-                              FontWeight="Bold" 
-                              Foreground="White" 
-                              FontSize="16"/>
+                <Border Grid.Row="0" Background="{DynamicResource PrimaryBrush}" Padding="20">
+                    <TextBlock Text="👥 Danh sách nhân vật" 
+                              FontWeight="SemiBold" 
+                              Foreground="{DynamicResource OnPrimaryBrush}" 
+                              FontSize="18"/>
                 </Border>
 
                 <!-- Search -->
-                <Border Grid.Row="1" Background="#F8F9FA" Padding="10">
+                <Border Grid.Row="1" Background="{DynamicResource SurfaceVariantBrush}" Padding="10">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
@@ -42,7 +51,11 @@
 
                         <TextBox Grid.Column="0"
                                 Text="{Binding SearchText}"
-                                Watermark="Tìm kiếm nhân vật..."
+                                Watermark="🔍 Tìm kiếm nhân vật..."
+                                Background="{DynamicResource SurfaceBrush}"
+                                BorderBrush="{DynamicResource OutlineBrush}"
+                                Foreground="{DynamicResource OnSurfaceBrush}"
+                                CornerRadius="8"
                                 Margin="0,0,10,0">
                             <TextBox.KeyBindings>
                                 <KeyBinding Gesture="Enter" Command="{Binding SearchCharactersCommand}"/>
@@ -50,8 +63,11 @@
                         </TextBox>
 
                         <Button Grid.Column="1"
-                               Content="Tìm"
+                               Content="🔍 Tìm"
                                Command="{Binding SearchCharactersCommand}"
+                               Background="{DynamicResource PrimaryBrush}"
+                               Foreground="{DynamicResource OnPrimaryBrush}"
+                               CornerRadius="8"
                                Padding="15,8"/>
                     </Grid>
                 </Border>
@@ -78,20 +94,21 @@
                                         <TextBlock Grid.Row="0"
                                                   Text="{Binding Name}" 
                                                   FontWeight="Bold" 
-                                                  FontSize="14"/>
+                                                  FontSize="14"
+                                                  Foreground="{DynamicResource OnSurfaceBrush}"/>
                                         
                                         <TextBlock Grid.Row="1"
                                                   Text="{Binding Description}" 
                                                   FontSize="12" 
-                                                  Foreground="#7F8C8D" 
+                                                  Foreground="{DynamicResource OnSurfaceMutedBrush}" 
                                                   TextWrapping="Wrap"
                                                   MaxLines="3"
                                                   Margin="0,4,0,0"/>
                                         
                                         <TextBlock Grid.Row="2"
-                                                  Text="{Binding CreatedAt, StringFormat='Tạo: {0:dd/MM/yyyy}'}" 
+                                                  Text="{Binding CreatedAt, StringFormat='📅 {0:dd/MM/yyyy}'}" 
                                                   FontSize="10" 
-                                                  Foreground="#95A5A6"
+                                                  Foreground="{DynamicResource OnSurfaceVariantBrush}"
                                                   Margin="0,4,0,0"/>
                                     </Grid>
                                 </Button>
@@ -101,25 +118,40 @@
                 </ScrollViewer>
 
                 <!-- Action Buttons -->
-                <Border Grid.Row="3" Background="#F8F9FA" Padding="10">
-                    <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center">
-                        <Button Content="Nhân vật mới"
+                <Border Grid.Row="3" Background="{DynamicResource SurfaceTintBrush}" 
+                        BorderBrush="{DynamicResource OutlineBrush}" BorderThickness="0,1,0,0" Padding="16">
+                    <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
+                        <!-- Clear Form button - only visible when no character is selected -->
+                        <Button Content="📝 Form mới"
                                Command="{Binding StartNewCharacterCommand}"
-                               Background="#27AE60"
-                               Padding="15,8"/>
+                               IsVisible="{Binding IsNewCharacterMode}"
+                               Classes="SecondaryButton"
+                               Padding="14,8"/>
                         
-                        <Button Content="Chỉnh sửa"
+                        <!-- Create Character button - TESTING: Always visible -->
+                        <Button Content="➕ Tạo nhân vật"
+                               Command="{Binding SaveCharacterCommand}"
+                               IsVisible="True"
+                               Classes="PrimaryButton"
+                               Padding="16,10"
+                               FontWeight="SemiBold"/>
+                        
+                        <!-- Edit button - only visible when a character is selected and not editing -->
+                        <Button Content="✏️ Chỉnh sửa"
                                Command="{Binding StartEditCharacterCommand}"
                                IsEnabled="{Binding CanEdit}"
-                               Background="#F39C12"
-                               Padding="15,8"/>
+                               IsVisible="{Binding SelectedCharacter, Converter={x:Static converters:ObjectToBooleanConverter.Instance}}"
+                               Classes="WarningButton"
+                               Padding="16,10"/>
                         
-                        <Button Content="Xóa"
+                        <!-- Delete button - only visible when a character is selected -->
+                        <Button Content="🗑️ Xóa"
                                Command="{Binding DeleteCharacterCommand}"
                                CommandParameter="{Binding SelectedCharacter}"
                                IsEnabled="{Binding CanDelete}"
-                               Background="#E74C3C"
-                               Padding="15,8"/>
+                               IsVisible="{Binding SelectedCharacter, Converter={x:Static converters:ObjectToBooleanConverter.Instance}}"
+                               Classes="ErrorButton"
+                               Padding="16,10"/>
                     </StackPanel>
                 </Border>
             </Grid>
@@ -134,30 +166,45 @@
             </Grid.RowDefinitions>
 
             <!-- Header -->
-            <Border Grid.Row="0" Background="#34495E" Padding="15" CornerRadius="4,4,0,0">
+            <Border Grid.Row="0" Background="{DynamicResource PrimaryBrush}" Padding="20" CornerRadius="8,8,0,0">
                 <TextBlock Text="{Binding IsEditing, Converter={x:Static converters:EditModeHeaderConverter.Instance}}" 
-                          FontWeight="Bold" 
-                          Foreground="White" 
-                          FontSize="16"/>
+                          FontWeight="SemiBold" 
+                          Foreground="{DynamicResource OnPrimaryBrush}" 
+                          FontSize="18"/>
             </Border>
 
             <!-- Form -->
             <ScrollViewer Grid.Row="1">
-                <Border Background="#F8F9FA" Padding="20" CornerRadius="0,0,4,4">
+                <Border Background="{DynamicResource SurfaceBrush}" Padding="24" CornerRadius="0,0,8,8"
+                        BorderBrush="{DynamicResource OutlineBrush}" BorderThickness="1,0,1,1">
                     <StackPanel Spacing="15">
                         <!-- Name -->
                         <StackPanel>
-                            <TextBlock Text="Tên nhân vật *" FontWeight="Bold" Margin="0,0,0,5"/>
+                            <TextBlock Text="👤 Tên nhân vật *" 
+                                      FontWeight="Bold" 
+                                      Foreground="{DynamicResource OnSurfaceBrush}"
+                                      Margin="0,0,0,5"/>
                             <TextBox Text="{Binding CharacterName}"
                                     Watermark="Nhập tên nhân vật..."
+                                    Background="{DynamicResource SurfaceVariantBrush}"
+                                    BorderBrush="{DynamicResource OutlineBrush}"
+                                    Foreground="{DynamicResource OnSurfaceBrush}"
+                                    CornerRadius="8"
                                     IsEnabled="{Binding !IsSaving}"/>
                         </StackPanel>
 
                         <!-- Description -->
                         <StackPanel>
-                            <TextBlock Text="Mô tả" FontWeight="Bold" Margin="0,0,0,5"/>
+                            <TextBlock Text="📝 Mô tả" 
+                                      FontWeight="Bold" 
+                                      Foreground="{DynamicResource OnSurfaceBrush}"
+                                      Margin="0,0,0,5"/>
                             <TextBox Text="{Binding CharacterDescription}"
                                     Watermark="Mô tả về nhân vật..."
+                                    Background="{DynamicResource SurfaceVariantBrush}"
+                                    BorderBrush="{DynamicResource OutlineBrush}"
+                                    Foreground="{DynamicResource OnSurfaceBrush}"
+                                    CornerRadius="8"
                                     AcceptsReturn="True"
                                     Height="80"
                                     IsEnabled="{Binding !IsSaving}"/>
@@ -165,9 +212,16 @@
 
                         <!-- Avatar URL -->
                         <StackPanel>
-                            <TextBlock Text="URL Avatar" FontWeight="Bold" Margin="0,0,0,5"/>
+                            <TextBlock Text="🖼️ URL Avatar" 
+                                      FontWeight="Bold" 
+                                      Foreground="{DynamicResource OnSurfaceBrush}"
+                                      Margin="0,0,0,5"/>
                             <TextBox Text="{Binding AvatarUrl}"
                                     Watermark="https://example.com/avatar.jpg"
+                                    Background="{DynamicResource SurfaceVariantBrush}"
+                                    BorderBrush="{DynamicResource OutlineBrush}"
+                                    Foreground="{DynamicResource OnSurfaceBrush}"
+                                    CornerRadius="8"
                                     IsEnabled="{Binding !IsSaving}"/>
                         </StackPanel>
 
@@ -180,27 +234,34 @@
                                 </Grid.ColumnDefinitions>
                                 
                                 <TextBlock Grid.Column="0"
-                                          Text="System Prompt *" 
+                                          Text="🤖 System Prompt *" 
                                           FontWeight="Bold" 
+                                          Foreground="{DynamicResource OnSurfaceBrush}"
                                           Margin="0,0,0,5"/>
                                 
                                 <Button Grid.Column="1"
-                                       Content="Kiểm tra"
+                                       Content="✓ Kiểm tra"
                                        Command="{Binding ValidateSystemPromptCommand}"
                                        FontSize="10"
-                                       Padding="8,4"
-                                       Background="#3498DB"/>
+                                       Background="{DynamicResource AccentBrush}"
+                                       Foreground="{DynamicResource OnAccentBrush}"
+                                       CornerRadius="6"
+                                       Padding="8,4"/>
                             </Grid>
                             
                             <TextBox Text="{Binding SystemPrompt}"
                                     Watermark="Bạn là một nhân vật AI thông minh và thân thiện..."
+                                    Background="{DynamicResource SurfaceVariantBrush}"
+                                    BorderBrush="{DynamicResource OutlineBrush}"
+                                    Foreground="{DynamicResource OnSurfaceBrush}"
+                                    CornerRadius="8"
                                     AcceptsReturn="True"
                                     Height="150"
                                     IsEnabled="{Binding !IsSaving}"/>
                             
-                            <TextBlock Text="Hướng dẫn: System prompt định nghĩa tính cách và cách hành xử của nhân vật AI. Hãy mô tả chi tiết về tính cách, phong cách nói chuyện, và vai trò của nhân vật."
+                            <TextBlock Text="💡 Hướng dẫn: System prompt định nghĩa tính cách và cách hành xử của nhân vật AI. Hãy mô tả chi tiết về tính cách, phong cách nói chuyện, và vai trò của nhân vật."
                                       FontSize="11"
-                                      Foreground="#7F8C8D"
+                                      Foreground="{DynamicResource OnSurfaceMutedBrush}"
                                       TextWrapping="Wrap"
                                       Margin="0,5,0,0"/>
                         </StackPanel>
@@ -209,50 +270,62 @@
             </ScrollViewer>
 
             <!-- Action Buttons -->
-            <Border Grid.Row="2" Background="#F8F9FA" Padding="15" CornerRadius="0,0,4,4">
+            <Border Grid.Row="2" Background="{DynamicResource SurfaceVariantBrush}" 
+                    BorderBrush="{DynamicResource OutlineBrush}" BorderThickness="0,1,0,0"
+                    Padding="15" CornerRadius="0,0,8,8">
                 <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Right">
                     <!-- Cancel button for edit mode -->
-                    <Button Content="Hủy"
+                    <Button Content="❌ Hủy"
                            Command="{Binding CancelEditCommand}"
                            IsVisible="{Binding IsEditing}"
-                           Background="#95A5A6"
-                           Padding="20,8"/>
+                           Background="{DynamicResource OutlineBrush}"
+                           Foreground="{DynamicResource OnSurfaceBrush}"
+                           CornerRadius="8"
+                           Padding="20,10"/>
                     
                     <!-- Cancel button for new character mode -->
-                    <Button Content="Hủy"
+                    <Button Content="❌ Hủy"
                            Command="{Binding CancelEditCommand}"
                            IsVisible="{Binding !IsEditing}"
-                           Background="#95A5A6"
-                           Padding="20,8"/>
+                           Background="{DynamicResource OutlineBrush}"
+                           Foreground="{DynamicResource OnSurfaceBrush}"
+                           CornerRadius="8"
+                           Padding="20,10"/>
                     
                     <!-- Save button for edit mode -->
-                    <Button Content="Cập nhật"
+                    <Button Content="✏️ Cập nhật"
                            Command="{Binding SaveCharacterCommand}"
                            IsEnabled="{Binding CanSave}"
                            IsVisible="{Binding IsEditing}"
-                           Background="#F39C12"
-                           Padding="20,8"/>
+                           Background="{DynamicResource WarningBrush}"
+                           Foreground="White"
+                           CornerRadius="8"
+                           Padding="20,10"/>
                     
                     <!-- Create button for new character mode -->
-                    <Button Content="Tạo nhân vật"
+                    <Button Content="✨ NEW CHARACTER"
                            Command="{Binding SaveCharacterCommand}"
                            IsEnabled="{Binding CanSave}"
                            IsVisible="{Binding !IsEditing}"
-                           Background="#27AE60"
-                           Padding="20,8"/>
+                           Background="{Binding CanSave, Converter={x:Static converters:BooleanToSaveButtonBackgroundConverter.Instance}}"
+                           Foreground="White"
+                           CornerRadius="8"
+                           Padding="24,12"
+                           FontWeight="Bold"
+                           FontSize="14"/>
                 </StackPanel>
             </Border>
 
             <!-- Status Message -->
             <Border Grid.Row="2" 
-                   Background="#3498DB" 
-                   Padding="10"
-                   CornerRadius="4"
+                   Background="{DynamicResource AccentBrush}" 
+                   Padding="12"
+                   CornerRadius="8"
                    Margin="0,10,0,0"
                    IsVisible="{Binding StatusMessage, Converter={x:Static converters:ObjectToBooleanConverter.Instance}}">
                 <TextBlock Text="{Binding StatusMessage}" 
-                          Foreground="White" 
-                          FontWeight="Bold"
+                          Foreground="{DynamicResource OnAccentBrush}" 
+                          FontWeight="SemiBold"
                           HorizontalAlignment="Center"/>
             </Border>
         </Grid>

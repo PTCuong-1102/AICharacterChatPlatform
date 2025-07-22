@@ -8,6 +8,18 @@
              x:Class="AICharacterChat.UI.Views.ChatView"
              x:DataType="vm:ChatViewModel">
 
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceInclude Source="/Styles/AppTheme.axaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+    
+    <UserControl.Styles>
+        <StyleInclude Source="/Styles/TextBoxStyles.axaml"/>
+    </UserControl.Styles>
+
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="250"/>
@@ -16,40 +28,45 @@
         </Grid.ColumnDefinitions>
 
         <!-- Characters Panel -->
-        <Border Grid.Column="0" Background="#ECF0F1" BorderBrush="#BDC3C7" BorderThickness="0,0,1,0">
+        <Border Grid.Column="0" Background="{DynamicResource SurfaceBrush}" 
+                BorderBrush="{DynamicResource OutlineBrush}" BorderThickness="0,0,1,0">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
 
-                <Border Grid.Row="0" Background="#34495E" Padding="10">
-                    <TextBlock Text="Nhân vật" 
-                              FontWeight="Bold" 
-                              Foreground="White" 
-                              FontSize="14"/>
+                <Border Grid.Row="0" Background="{DynamicResource PrimaryBrush}" Padding="16">
+                    <TextBlock Text="👥 Nhân vật" 
+                              FontWeight="SemiBold" 
+                              Foreground="{DynamicResource OnPrimaryBrush}" 
+                              FontSize="16"/>
                 </Border>
 
                 <ScrollViewer Grid.Row="1">
                     <ItemsControl ItemsSource="{Binding Characters}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
-                                <Button Padding="10" 
+                                <Button Padding="16,12" 
                                        Background="{Binding IsSelected, Converter={x:Static converters:BooleanToBackgroundConverter.Instance}}"
                                        Command="{Binding $parent[UserControl].((vm:ChatViewModel)DataContext).SelectCharacterCommand}"
                                        CommandParameter="{Binding}"
                                        HorizontalContentAlignment="Stretch"
-                                       BorderThickness="0">
+                                       BorderThickness="0"
+                                       CornerRadius="8"
+                                       Margin="8,4">
                                     
                                     <StackPanel>
                                         <TextBlock Text="{Binding Name}" 
-                                                  FontWeight="Bold" 
-                                                  FontSize="14"/>
+                                                  FontWeight="SemiBold" 
+                                                  FontSize="15"
+                                                  Foreground="{DynamicResource OnSurfaceBrush}"/>
                                         <TextBlock Text="{Binding Description}" 
-                                                  FontSize="12" 
-                                                  Foreground="#7F8C8D" 
+                                                  FontSize="13" 
+                                                  Foreground="{DynamicResource OnSurfaceMutedBrush}" 
                                                   TextWrapping="Wrap"
-                                                  MaxLines="2"/>
+                                                  MaxLines="2"
+                                                  Margin="0,4,0,0"/>
                                     </StackPanel>
                                 </Button>
                             </DataTemplate>
@@ -60,7 +77,8 @@
         </Border>
 
         <!-- Conversations Panel -->
-        <Border Grid.Column="1" Background="#F8F9FA" BorderBrush="#BDC3C7" BorderThickness="0,0,1,0">
+        <Border Grid.Column="1" Background="{DynamicResource SurfaceVariantBrush}" 
+                BorderBrush="{DynamicResource OutlineBrush}" BorderThickness="0,0,1,0">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
@@ -68,7 +86,7 @@
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
 
-                <Border Grid.Row="0" Background="#34495E" Padding="10">
+                <Border Grid.Row="0" Background="{DynamicResource PrimaryBrush}" Padding="16">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
@@ -76,27 +94,30 @@
                         </Grid.ColumnDefinitions>
                         
                         <TextBlock Grid.Column="0"
-                                  Text="Cuộc hội thoại" 
-                                  FontWeight="Bold" 
-                                  Foreground="White" 
-                                  FontSize="14"
+                                  Text="💬 Cuộc hội thoại" 
+                                  FontWeight="SemiBold" 
+                                  Foreground="{DynamicResource OnPrimaryBrush}" 
+                                  FontSize="16"
                                   VerticalAlignment="Center"/>
                         
                         <Button Grid.Column="1"
                                Content="+"
                                Command="{Binding StartNewConversationCommand}"
-                               Width="30" Height="30"
-                               FontSize="16" FontWeight="Bold"
-                               Background="#27AE60"
+                               Width="32" Height="32"
+                               FontSize="18" FontWeight="Bold"
+                               Background="{DynamicResource SecondaryBrush}"
+                               Foreground="{DynamicResource OnSecondaryBrush}"
+                               CornerRadius="16"
                                ToolTip.Tip="Cuộc hội thoại mới"/>
                     </Grid>
                 </Border>
 
                 <TextBlock Grid.Row="1" 
                           Text="{Binding SelectedCharacter.Name, StringFormat='Với: {0}'}"
-                          Padding="10,5"
+                          Padding="16,8"
                           FontStyle="Italic"
-                          Foreground="#7F8C8D"
+                          Foreground="{DynamicResource OnSurfaceVariantBrush}"
+                          Background="{DynamicResource SurfaceTintBrush}"
                           IsVisible="{Binding SelectedCharacter, Converter={x:Static converters:ObjectToBooleanConverter.Instance}}"/>
 
                 <ScrollViewer Grid.Row="2">
@@ -121,12 +142,13 @@
                                                   Text="{Binding Title}" 
                                                   FontWeight="Bold" 
                                                   FontSize="13"
+                                                  Foreground="{DynamicResource OnSurfaceBrush}"
                                                   TextWrapping="Wrap"/>
                                         
                                         <TextBlock Grid.Row="1"
                                                   Text="{Binding LastMessage}" 
                                                   FontSize="11" 
-                                                  Foreground="#7F8C8D" 
+                                                  Foreground="{DynamicResource OnSurfaceMutedBrush}" 
                                                   TextWrapping="Wrap"
                                                   MaxLines="2"
                                                   Margin="0,2,0,0"/>
@@ -134,7 +156,7 @@
                                         <TextBlock Grid.Row="2"
                                                   Text="{Binding FormattedLastMessageTime}" 
                                                   FontSize="10" 
-                                                  Foreground="#95A5A6"
+                                                  Foreground="{DynamicResource OnSurfaceVariantBrush}"
                                                   HorizontalAlignment="Right"
                                                   Margin="0,2,0,0"/>
                                     </Grid>
@@ -155,7 +177,7 @@
             </Grid.RowDefinitions>
 
             <!-- Chat Header -->
-            <Border Grid.Row="0" Background="#34495E" Padding="15">
+            <Border Grid.Row="0" Background="{DynamicResource PrimaryBrush}" Padding="20">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
@@ -163,71 +185,95 @@
                     </Grid.ColumnDefinitions>
 
                     <StackPanel Grid.Column="0">
-                        <TextBlock Text="{Binding SelectedCharacter.Name, FallbackValue='Chọn nhân vật để bắt đầu'}" 
-                                  FontWeight="Bold" 
-                                  Foreground="White" 
-                                  FontSize="16"/>
+                        <TextBlock Text="{Binding SelectedCharacter.Name, FallbackValue='🤖 Chọn nhân vật để bắt đầu'}" 
+                                  FontWeight="SemiBold" 
+                                  Foreground="{DynamicResource OnPrimaryBrush}" 
+                                  FontSize="18"/>
                         <TextBlock Text="{Binding SelectedConversation.Title, FallbackValue=''}" 
-                                  Foreground="#BDC3C7" 
-                                  FontSize="12"/>
+                                  Foreground="{DynamicResource OnPrimaryBrush}"
+                                  Opacity="0.8"
+                                  FontSize="13"/>
                     </StackPanel>
 
                     <TextBlock Grid.Column="1"
                               Text="{Binding StatusMessage}" 
-                              Foreground="#BDC3C7" 
-                              FontSize="12"
+                              Foreground="{DynamicResource OnPrimaryBrush}"
+                              Opacity="0.8"
+                              FontSize="13"
                               VerticalAlignment="Center"/>
                 </Grid>
             </Border>
 
             <!-- Messages Area -->
-            <ScrollViewer Grid.Row="1" 
-                         Name="MessagesScrollViewer"
-                         Padding="15">
-                <ItemsControl ItemsSource="{Binding Messages}">
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <Border Margin="0,5" 
-                                   Padding="12,8"
-                                   CornerRadius="8"
-                                   MaxWidth="400"
-                                   Background="{Binding IsFromUser, Converter={x:Static converters:MessageBackgroundConverter.Instance}}"
-                                   HorizontalAlignment="{Binding IsFromUser, Converter={x:Static converters:MessageAlignmentConverter.Instance}}">
-                                
-                                <StackPanel>
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="Auto"/>
-                                        </Grid.ColumnDefinitions>
+            <ListBox Grid.Row="1" 
+                    Name="MessagesListBox"
+                    ItemsSource="{Binding Messages}"
+                    Background="{DynamicResource BackgroundBrush}"
+                    ScrollViewer.VerticalScrollBarVisibility="Auto"
+                    ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                    Padding="20"
+                    BorderThickness="0"
+                    SelectionMode="Single">
+                    
+                <ListBox.Styles>
+                    <!-- Remove selection highlighting -->
+                    <Style Selector="ListBoxItem">
+                        <Setter Property="Background" Value="Transparent"/>
+                        <Setter Property="Padding" Value="0"/>
+                        <Setter Property="Margin" Value="0"/>
+                        <Setter Property="BorderThickness" Value="0"/>
+                    </Style>
+                    <Style Selector="ListBoxItem:selected">
+                        <Setter Property="Background" Value="Transparent"/>
+                    </Style>
+                    <Style Selector="ListBoxItem:selected:focus">
+                        <Setter Property="Background" Value="Transparent"/>
+                    </Style>
+                </ListBox.Styles>
+                
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <Border Margin="0,5" 
+                               Padding="12,8"
+                               CornerRadius="8"
+                               MaxWidth="400"
+                               Background="{Binding IsFromUser, Converter={x:Static converters:MessageBackgroundConverter.Instance}}"
+                               HorizontalAlignment="{Binding IsFromUser, Converter={x:Static converters:MessageAlignmentConverter.Instance}}">
+                            
+                            <StackPanel>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
 
-                                        <TextBlock Grid.Column="0"
-                                                  Text="{Binding SenderDisplayName}" 
-                                                  FontWeight="Bold" 
-                                                  FontSize="12"
-                                                  Foreground="{Binding IsFromUser, Converter={x:Static converters:MessageTextColorConverter.Instance}}"/>
-                                        
-                                        <TextBlock Grid.Column="1"
-                                                  Text="{Binding FormattedTimestamp}" 
-                                                  FontSize="10" 
-                                                  Foreground="{Binding IsFromUser, Converter={x:Static converters:MessageTimeColorConverter.Instance}}"
-                                                  VerticalAlignment="Top"/>
-                                    </Grid>
+                                    <TextBlock Grid.Column="0"
+                                              Text="{Binding SenderDisplayName}" 
+                                              FontWeight="Bold" 
+                                              FontSize="12"
+                                              Foreground="{Binding IsFromUser, Converter={x:Static converters:MessageTextColorConverter.Instance}}"/>
+                                    
+                                    <TextBlock Grid.Column="1"
+                                              Text="{Binding FormattedTimestamp}" 
+                                              FontSize="10" 
+                                              Foreground="{Binding IsFromUser, Converter={x:Static converters:MessageTimeColorConverter.Instance}}"
+                                              VerticalAlignment="Top"/>
+                                </Grid>
 
-                                    <TextBlock Text="{Binding Content}" 
-                                              TextWrapping="Wrap" 
-                                              FontSize="13"
-                                              Foreground="{Binding IsFromUser, Converter={x:Static converters:MessageTextColorConverter.Instance}}"
-                                              Margin="0,4,0,0"/>
-                                </StackPanel>
-                            </Border>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
-            </ScrollViewer>
+                                <TextBlock Text="{Binding Content}" 
+                                          TextWrapping="Wrap" 
+                                          FontSize="13"
+                                          Foreground="{Binding IsFromUser, Converter={x:Static converters:MessageTextColorConverter.Instance}}"
+                                          Margin="0,4,0,0"/>
+                            </StackPanel>
+                        </Border>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
 
             <!-- Message Input -->
-            <Border Grid.Row="2" Background="#F8F9FA" BorderBrush="#BDC3C7" BorderThickness="0,1,0,0" Padding="15">
+            <Border Grid.Row="2" Background="{DynamicResource SurfaceBrush}" 
+                    BorderBrush="{DynamicResource OutlineBrush}" BorderThickness="0,1,0,0" Padding="20">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
@@ -236,10 +282,16 @@
 
                     <TextBox Grid.Column="0"
                             Text="{Binding MessageText}"
-                            Watermark="Nhập tin nhắn..."
+                            Watermark="💬 Nhập tin nhắn..."
                             AcceptsReturn="True"
-                            MaxHeight="100"
+                            MaxHeight="120"
                             VerticalAlignment="Bottom"
+                            Background="{DynamicResource SurfaceVariantBrush}"
+                            BorderBrush="{DynamicResource OutlineBrush}"
+                            Foreground="{DynamicResource OnSurfaceBrush}"
+                            FontSize="14"
+                            Padding="16,12"
+                            CornerRadius="12"
                             IsEnabled="{Binding SelectedCharacter, Converter={x:Static converters:ObjectToBooleanConverter.Instance}}">
                         <TextBox.KeyBindings>
                             <KeyBinding Gesture="Enter" Command="{Binding SendMessageCommand}"/>
@@ -247,12 +299,15 @@
                     </TextBox>
 
                     <Button Grid.Column="1"
-                           Content="Gửi"
+                           Content="📤"
                            Command="{Binding SendMessageCommand}"
                            IsEnabled="{Binding CanSendMessage}"
-                           Margin="10,0,0,0"
-                           Padding="20,8"
-                           Background="#3498DB"/>
+                           Margin="12,0,0,0"
+                           Width="48" Height="48"
+                           FontSize="18"
+                           Background="{DynamicResource SecondaryBrush}"
+                           Foreground="{DynamicResource OnSecondaryBrush}"
+                           CornerRadius="24"/>
                 </Grid>
             </Border>
         </Grid>
