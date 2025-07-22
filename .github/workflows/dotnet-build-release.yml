@@ -48,6 +48,7 @@ jobs:
       run: |
         sed -i '' 's|</PropertyGroup>|  <RuntimeIdentifiers>win-x64;linux-x64;osx-x64;osx-arm64</RuntimeIdentifiers>\n</PropertyGroup>|' AICharacterChat.UI/AICharacterChat.UI.csproj
       shell: bash
+
     - name: Create appsettings.json
       run: |
         echo '{
@@ -60,10 +61,13 @@ jobs:
           }
         }' > AICharacterChat.UI/appsettings.json
       shell: bash
+
     - name: Restore dependencies
       run: dotnet restore AICharacterChatPlatform.sln
+
     - name: Publish Application
       run: dotnet publish AICharacterChat.UI/AICharacterChat.UI.csproj --configuration Release --runtime ${{ matrix.rid }} --self-contained true -p:PublishSingleFile=true -o ./publish/${{ matrix.output_name }} --no-restore
+
     - name: Archive production artifacts (Windows)
       if: runner.os == 'Windows'
       run: Compress-Archive -Path ./publish/${{ matrix.output_name }}/* -DestinationPath ./publish/${{ matrix.output_name }}.zip
@@ -77,6 +81,7 @@ jobs:
       with:
         name: ${{ matrix.output_name }}
         path: ./publish/${{ matrix.output_name }}.*
+
   create-release:
     needs: build
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
@@ -89,6 +94,7 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: build-${{ github.sha }}
           draft: true
           generate_release_notes: true
           files: |
