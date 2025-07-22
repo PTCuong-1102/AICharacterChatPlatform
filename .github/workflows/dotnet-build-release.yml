@@ -44,9 +44,32 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-nuget-
 
-    - name: Add RuntimeIdentifiers to the project
+    - name: Add RuntimeIdentifiers to project files
       run: |
-        sed -i '' 's|</PropertyGroup>|  <RuntimeIdentifiers>win-x64;linux-x64;osx-x64;osx-arm64</RuntimeIdentifiers>\n</PropertyGroup>|' AICharacterChat.UI/AICharacterChat.UI.csproj
+        # Add RuntimeIdentifiers to UI project
+        if ! grep -q "RuntimeIdentifiers" AICharacterChat.UI/AICharacterChat.UI.csproj; then
+          if [[ "$RUNNER_OS" == "Windows" ]]; then
+            powershell -Command "(Get-Content AICharacterChat.UI/AICharacterChat.UI.csproj) -replace '</PropertyGroup>', '    <RuntimeIdentifiers>win-x64;linux-x64;osx-x64;osx-arm64</RuntimeIdentifiers>`n  </PropertyGroup>' | Set-Content AICharacterChat.UI/AICharacterChat.UI.csproj"
+          else
+            sed -i.bak 's|</PropertyGroup>|    <RuntimeIdentifiers>win-x64;linux-x64;osx-x64;osx-arm64</RuntimeIdentifiers>\n  </PropertyGroup>|' AICharacterChat.UI/AICharacterChat.UI.csproj
+          fi
+        fi
+        # Add RuntimeIdentifiers to Data project  
+        if ! grep -q "RuntimeIdentifiers" AICharacterChat.Data/AICharacterChat.Data.csproj; then
+          if [[ "$RUNNER_OS" == "Windows" ]]; then
+            powershell -Command "(Get-Content AICharacterChat.Data/AICharacterChat.Data.csproj) -replace '</PropertyGroup>', '    <RuntimeIdentifiers>win-x64;linux-x64;osx-x64;osx-arm64</RuntimeIdentifiers>`n  </PropertyGroup>' | Set-Content AICharacterChat.Data/AICharacterChat.Data.csproj"
+          else
+            sed -i.bak 's|</PropertyGroup>|    <RuntimeIdentifiers>win-x64;linux-x64;osx-x64;osx-arm64</RuntimeIdentifiers>\n  </PropertyGroup>|' AICharacterChat.Data/AICharacterChat.Data.csproj
+          fi
+        fi
+        # Add RuntimeIdentifiers to Business project
+        if ! grep -q "RuntimeIdentifiers" AICharacterChat.Business/AICharacterChat.Business.csproj; then
+          if [[ "$RUNNER_OS" == "Windows" ]]; then
+            powershell -Command "(Get-Content AICharacterChat.Business/AICharacterChat.Business.csproj) -replace '</PropertyGroup>', '    <RuntimeIdentifiers>win-x64;linux-x64;osx-x64;osx-arm64</RuntimeIdentifiers>`n  </PropertyGroup>' | Set-Content AICharacterChat.Business/AICharacterChat.Business.csproj"
+          else
+            sed -i.bak 's|</PropertyGroup>|    <RuntimeIdentifiers>win-x64;linux-x64;osx-x64;osx-arm64</RuntimeIdentifiers>\n  </PropertyGroup>|' AICharacterChat.Business/AICharacterChat.Business.csproj
+          fi
+        fi
       shell: bash
 
     - name: Create appsettings.json
@@ -66,7 +89,7 @@ jobs:
       run: dotnet restore AICharacterChatPlatform.sln
 
     - name: Publish Application
-      run: dotnet publish AICharacterChat.UI/AICharacterChat.UI.csproj --configuration Release --runtime ${{ matrix.rid }} --self-contained true -p:PublishSingleFile=true -o ./publish/${{ matrix.output_name }} --no-restore
+      run: dotnet publish AICharacterChat.UI/AICharacterChat.UI.csproj --configuration Release --runtime ${{ matrix.rid }} --self-contained true -p:PublishSingleFile=true -o ./publish/${{ matrix.output_name }}
 
     - name: Archive production artifacts (Windows)
       if: runner.os == 'Windows'
