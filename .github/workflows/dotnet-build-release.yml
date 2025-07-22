@@ -44,33 +44,35 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-nuget-
 
-    - name: Add RuntimeIdentifiers to project files
+    - name: Add RuntimeIdentifiers to project files (Windows)
+      if: runner.os == 'Windows'
       run: |
-        # Add RuntimeIdentifiers to UI project
+        if (!(Select-String -Path "AICharacterChat.UI/AICharacterChat.UI.csproj" -Pattern "RuntimeIdentifiers")) {
+          (Get-Content "AICharacterChat.UI/AICharacterChat.UI.csproj") -replace "</PropertyGroup>", "    <RuntimeIdentifiers>win-x64;linux-x64;osx-x64;osx-arm64</RuntimeIdentifiers>`n  </PropertyGroup>" | Set-Content "AICharacterChat.UI/AICharacterChat.UI.csproj"
+        }
+        if (!(Select-String -Path "AICharacterChat.Data/AICharacterChat.Data.csproj" -Pattern "RuntimeIdentifiers")) {
+          (Get-Content "AICharacterChat.Data/AICharacterChat.Data.csproj") -replace "</PropertyGroup>", "    <RuntimeIdentifiers>win-x64;linux-x64;osx-x64;osx-arm64</RuntimeIdentifiers>`n  </PropertyGroup>" | Set-Content "AICharacterChat.Data/AICharacterChat.Data.csproj"
+        }
+        if (!(Select-String -Path "AICharacterChat.Business/AICharacterChat.Business.csproj" -Pattern "RuntimeIdentifiers")) {
+          (Get-Content "AICharacterChat.Business/AICharacterChat.Business.csproj") -replace "</PropertyGroup>", "    <RuntimeIdentifiers>win-x64;linux-x64;osx-x64;osx-arm64</RuntimeIdentifiers>`n  </PropertyGroup>" | Set-Content "AICharacterChat.Business/AICharacterChat.Business.csproj"
+        }
+      shell: pwsh
+
+    - name: Add RuntimeIdentifiers to project files (Unix)
+      if: runner.os != 'Windows'
+      run: |
         if ! grep -q "RuntimeIdentifiers" AICharacterChat.UI/AICharacterChat.UI.csproj; then
-          if [[ "$RUNNER_OS" == "Windows" ]]; then
-            powershell -Command "(Get-Content AICharacterChat.UI/AICharacterChat.UI.csproj) -replace '</PropertyGroup>', '    <RuntimeIdentifiers>win-x64;linux-x64;osx-x64;osx-arm64</RuntimeIdentifiers>`n  </PropertyGroup>' | Set-Content AICharacterChat.UI/AICharacterChat.UI.csproj"
-          else
-            sed -i.bak 's|</PropertyGroup>|    <RuntimeIdentifiers>win-x64;linux-x64;osx-x64;osx-arm64</RuntimeIdentifiers>\n  </PropertyGroup>|' AICharacterChat.UI/AICharacterChat.UI.csproj
-          fi
+          sed -i.bak 's|</PropertyGroup>|    <RuntimeIdentifiers>win-x64;linux-x64;osx-x64;osx-arm64</RuntimeIdentifiers>\
+  </PropertyGroup>|' AICharacterChat.UI/AICharacterChat.UI.csproj
         fi
-        # Add RuntimeIdentifiers to Data project  
         if ! grep -q "RuntimeIdentifiers" AICharacterChat.Data/AICharacterChat.Data.csproj; then
-          if [[ "$RUNNER_OS" == "Windows" ]]; then
-            powershell -Command "(Get-Content AICharacterChat.Data/AICharacterChat.Data.csproj) -replace '</PropertyGroup>', '    <RuntimeIdentifiers>win-x64;linux-x64;osx-x64;osx-arm64</RuntimeIdentifiers>`n  </PropertyGroup>' | Set-Content AICharacterChat.Data/AICharacterChat.Data.csproj"
-          else
-            sed -i.bak 's|</PropertyGroup>|    <RuntimeIdentifiers>win-x64;linux-x64;osx-x64;osx-arm64</RuntimeIdentifiers>\n  </PropertyGroup>|' AICharacterChat.Data/AICharacterChat.Data.csproj
-          fi
+          sed -i.bak 's|</PropertyGroup>|    <RuntimeIdentifiers>win-x64;linux-x64;osx-x64;osx-arm64</RuntimeIdentifiers>\
+  </PropertyGroup>|' AICharacterChat.Data/AICharacterChat.Data.csproj
         fi
-        # Add RuntimeIdentifiers to Business project
         if ! grep -q "RuntimeIdentifiers" AICharacterChat.Business/AICharacterChat.Business.csproj; then
-          if [[ "$RUNNER_OS" == "Windows" ]]; then
-            powershell -Command "(Get-Content AICharacterChat.Business/AICharacterChat.Business.csproj) -replace '</PropertyGroup>', '    <RuntimeIdentifiers>win-x64;linux-x64;osx-x64;osx-arm64</RuntimeIdentifiers>`n  </PropertyGroup>' | Set-Content AICharacterChat.Business/AICharacterChat.Business.csproj"
-          else
-            sed -i.bak 's|</PropertyGroup>|    <RuntimeIdentifiers>win-x64;linux-x64;osx-x64;osx-arm64</RuntimeIdentifiers>\n  </PropertyGroup>|' AICharacterChat.Business/AICharacterChat.Business.csproj
-          fi
+          sed -i.bak 's|</PropertyGroup>|    <RuntimeIdentifiers>win-x64;linux-x64;osx-x64;osx-arm64</RuntimeIdentifiers>\
+  </PropertyGroup>|' AICharacterChat.Business/AICharacterChat.Business.csproj
         fi
-      shell: bash
 
     - name: Create appsettings.json
       run: |
