@@ -1,7 +1,5 @@
-# Tên của workflow, sẽ hiển thị trong tab "Actions" trên GitHub
 name: .NET Build, Pack and Release
 
-# Điều kiện để kích hoạt workflow
 on:
   push:
     branches: [ "main" ]
@@ -10,10 +8,7 @@ on:
 
 jobs:
   build:
-    # Cấu hình chiến lược build
     strategy:
-      # Quan trọng: Cho phép các job khác tiếp tục chạy dù có một job bị lỗi.
-      # Hữu ích khi gặp lỗi mạng tạm thời trên một OS.
       fail-fast: false
       matrix:
         include:
@@ -24,47 +19,35 @@ jobs:
             rid: linux-x64
             output_name: AICharacterChat-linux-x64
           - os: macos-latest
-            rid: osx-x64 # Dành cho máy Mac dùng chip Intel
+            rid: osx-x64
             output_name: AICharacterChat-osx-x64
           - os: macos-latest
-            rid: osx-arm64 # Dành cho máy Mac dùng chip Apple Silicon
+            rid: osx-arm64
             output_name: AICharacterChat-osx-arm64
             
-    # Môi trường để chạy job
     runs-on: ${{ matrix.os }}
 
     steps:
-    # Step 1: Checkout mã nguồn
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    # Step 2: Cài đặt .NET SDK
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 8.0.x
 
-    # Step 3: Thêm bộ đệm cho các gói NuGet
-    # Giúp tăng tốc độ build và tránh lỗi do mạng
     - name: Cache NuGet packages
       uses: actions/cache@v4
       with:
         path: ~/.nuget/packages
-        # Tạo key cache dựa trên OS và hash của các file project
         key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
         restore-keys: |
           ${{ runner.os }}-nuget-
 
-    # Step 4: Sửa lỗi NETSDK1047 bằng cách thêm RuntimeIdentifiers
-    # Bước này tự động thêm các nền tảng build vào file project của UI
     - name: Add RuntimeIdentifiers to the project
       run: |
         sed -i '' 's|</PropertyGroup>|  <RuntimeIdentifiers>win-x64;linux-x64;osx-x64;osx-arm64</RuntimeIdentifiers>\n</PropertyGroup>|' AICharacterChat.UI/AICharacterChat.UI.csproj
       shell: bash
-      # Dòng lệnh trên sử dụng `sed` để tìm dòng </PropertyGroup> cuối cùng và chèn dòng RuntimeIdentifiers vào trước nó.
-      # Điều này đảm bảo dotnet restore sẽ chuẩn bị tài nguyên cho tất cả các nền tảng.
-
-    # Step 5: Tạo file appsettings.json từ GitHub Secret
     - name: Create appsettings.json
       run: |
         echo '{
@@ -77,16 +60,10 @@ jobs:
           }
         }' > AICharacterChat.UI/appsettings.json
       shell: bash
-
-    # Step 6: Khôi phục các gói NuGet
     - name: Restore dependencies
       run: dotnet restore AICharacterChatPlatform.sln
-
-    # Step 7: Đóng gói ứng dụng (Publish)
     - name: Publish Application
       run: dotnet publish AICharacterChat.UI/AICharacterChat.UI.csproj --configuration Release --runtime ${{ matrix.rid }} --self-contained true -p:PublishSingleFile=true -o ./publish/${{ matrix.output_name }} --no-restore
-      
-    # Step 8: Nén các file đã build
     - name: Archive production artifacts (Windows)
       if: runner.os == 'Windows'
       run: Compress-Archive -Path ./publish/${{ matrix.output_name }}/* -DestinationPath ./publish/${{ matrix.output_name }}.zip
@@ -95,34 +72,25 @@ jobs:
       if: runner.os != 'Windows'
       run: tar -czvf ./publish/${{ matrix.output_name }}.tar.gz -C ./publish/${{ matrix.output_name }}/ .
       
-    # Step 9: Tải lên các file build dưới dạng artifact
     - name: Upload build artifact
       uses: actions/upload-artifact@v4
       with:
         name: ${{ matrix.output_name }}
         path: ./publish/${{ matrix.output_name }}.*
-
-  # Job này sẽ chạy sau khi tất cả các job build hoàn tất
   create-release:
-    # Yêu cầu phải chạy sau job 'build'
     needs: build
-    # Chỉ chạy khi có push trực tiếp vào nhánh `main`
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
-      # Tải về tất cả các artifacts đã được tạo từ các job build
       - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
           path: artifacts
-          
-      # Tạo GitHub Release và đính kèm tất cả các file build
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           draft: true
           generate_release_notes: true
-          # Đính kèm tất cả các file từ các thư mục artifact
           files: |
             artifacts/AICharacterChat-win-x64/*.zip
             artifacts/AICharacterChat-linux-x64/*.tar.gz
