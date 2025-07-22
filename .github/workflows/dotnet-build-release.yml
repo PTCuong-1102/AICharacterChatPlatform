@@ -15,7 +15,6 @@ jobs:
       matrix:
         # Định nghĩa các OS và tên file tương ứng
         # rid (Runtime Identifier) là mã định danh nền tảng của .NET
-        os: [windows-latest, ubuntu-latest, macos-latest]
         include:
           - os: windows-latest
             rid: win-x64
@@ -24,8 +23,11 @@ jobs:
             rid: linux-x64
             output_name: AICharacterChat-linux-x64
           - os: macos-latest
-            rid: osx-x64
+            rid: osx-x64 # Dành cho máy Mac dùng chip Intel
             output_name: AICharacterChat-osx-x64
+          - os: macos-latest
+            rid: osx-arm64 # Dành cho máy Mac dùng chip Apple Silicon
+            output_name: AICharacterChat-osx-arm64
             
     # Môi trường để chạy job, lấy từ ma trận ở trên
     runs-on: ${{ matrix.os }}
@@ -42,7 +44,6 @@ jobs:
         dotnet-version: 8.0.x
 
     # Step 3: Tạo file appsettings.json từ GitHub Secret
-    # Đây là bước quan trọng để đưa API Key vào ứng dụng một cách an toàn
     - name: Create appsettings.json
       run: |
         echo '{
@@ -56,24 +57,16 @@ jobs:
         }' > AICharacterChat.UI/appsettings.json
       shell: bash
 
-    # Step 4: Khôi phục các gói NuGet cần thiết cho dự án
+    # Step 4: Khôi phục các gói NuGet, chỉ định rõ runtime để tránh xung đột
     - name: Restore dependencies
-      run: dotnet restore AICharacterChatPlatform.sln
+      run: dotnet restore AICharacterChatPlatform.sln --runtime ${{ matrix.rid }}
 
-    # Step 5: Build toàn bộ solution ở chế độ Release
-    - name: Build
-      run: dotnet build --configuration Release --no-restore AICharacterChatPlatform.sln
-
-    # (Tùy chọn) Step 6: Chạy Unit Tests nếu có
-    # - name: Test
-    #   run: dotnet test --no-build --verbosity normal
-
-    # Step 7: Đóng gói ứng dụng (Publish)
-    # Lệnh này sẽ tạo ra một thư mục chứa tất cả các file cần thiết để chạy ứng dụng
+    # Step 5: Đóng gói ứng dụng (Publish)
+    # Lệnh này sẽ tự động build và tạo ra một thư mục chứa tất cả các file cần thiết
     - name: Publish Application
-      run: dotnet publish AICharacterChat.UI/AICharacterChat.UI.csproj --configuration Release --runtime ${{ matrix.rid }} --self-contained true -p:PublishSingleFile=true -o ./publish/${{ matrix.output_name }}
+      run: dotnet publish AICharacterChat.UI/AICharacterChat.UI.csproj --configuration Release --runtime ${{ matrix.rid }} --self-contained true -p:PublishSingleFile=true -o ./publish/${{ matrix.output_name }} --no-restore
       
-    # Step 8: Nén thư mục đã publish thành file .zip (cho Windows) hoặc .tar.gz (cho Linux/macOS)
+    # Step 6: Nén thư mục đã publish thành file .zip (cho Windows) hoặc .tar.gz (cho Linux/macOS)
     - name: Archive production artifacts (Windows)
       if: runner.os == 'Windows'
       run: Compress-Archive -Path ./publish/${{ matrix.output_name }}/* -DestinationPath ./publish/${{ matrix.output_name }}.zip
@@ -82,28 +75,40 @@ jobs:
       if: runner.os != 'Windows'
       run: tar -czvf ./publish/${{ matrix.output_name }}.tar.gz -C ./publish/${{ matrix.output_name }}/ .
       
-    # Step 9: Tải lên các file đã nén như một "artifact" của workflow
-    # Artifacts là các file được tạo ra trong quá trình chạy, có thể được tải về sau khi workflow hoàn tất
+    # Step 7: Tải lên các file đã nén như một "artifact" của workflow
     - name: Upload build artifact
       uses: actions/upload-artifact@v4
       with:
         name: ${{ matrix.output_name }}
         path: ./publish/${{ matrix.output_name }}.*
 
-    # Step 10: Tạo GitHub Release và đính kèm các file build
-    # Bước này chỉ chạy khi có push trực tiếp vào nhánh `main` (không chạy cho pull request)
-    # và chỉ chạy một lần trên máy ảo Windows để tránh tạo nhiều release trùng lặp.
-    - name: Create GitHub Release
-      if: github.event_name == 'push' && github.ref == 'refs/heads/main' && runner.os == 'Windows'
-      uses: softprops/action-gh-release@v2
-      with:
-        # Tự động tạo các bản nháp release, bạn có thể vào chỉnh sửa và publish sau
-        draft: true
-        # Tự động tạo changelog dựa trên các commit
-        generate_release_notes: true
-        # Đính kèm tất cả các file zip và tar.gz trong thư mục publish
-        files: |
-          ./publish/*.zip
-          ./publish/*.tar.gz
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  # Job này sẽ chạy sau khi tất cả các job build hoàn tất
+  create-release:
+    # Yêu cầu phải chạy sau job 'build-and-release'
+    needs: build-and-release
+    # Chỉ chạy khi có push trực tiếp vào nhánh `main` (không chạy cho pull request)
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      # Tải về tất cả các artifacts đã được tạo từ các job build
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          
+      # Tạo GitHub Release và đính kèm tất cả các file build
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          # Tự động tạo các bản nháp release, bạn có thể vào chỉnh sửa và publish sau
+          draft: true
+          # Tự động tạo changelog dựa trên các commit
+          generate_release_notes: true
+          # Đính kèm tất cả các file từ các thư mục artifact
+          files: |
+            artifacts/AICharacterChat-win-x64/*.zip
+            artifacts/AICharacterChat-linux-x64/*.tar.gz
+            artifacts/AICharacterChat-osx-x64/*.tar.gz
+            artifacts/AICharacterChat-osx-arm64/*.tar.gz
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
