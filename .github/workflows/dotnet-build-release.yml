@@ -1,0 +1,109 @@
+# Tên của workflow, sẽ hiển thị trong tab "Actions" trên GitHub
+name: .NET Build, Pack and Release
+
+# Điều kiện để kích hoạt workflow
+on:
+  push:
+    branches: [ "main" ] # Chạy khi có push lên nhánh main
+  pull_request:
+    branches: [ "main" ] # Chạy khi có pull request vào nhánh main
+
+jobs:
+  build-and-release:
+    # Chạy workflow trên các hệ điều hành khác nhau để build ứng dụng đa nền tảng
+    strategy:
+      matrix:
+        # Định nghĩa các OS và tên file tương ứng
+        # rid (Runtime Identifier) là mã định danh nền tảng của .NET
+        os: [windows-latest, ubuntu-latest, macos-latest]
+        include:
+          - os: windows-latest
+            rid: win-x64
+            output_name: AICharacterChat-win-x64
+          - os: ubuntu-latest
+            rid: linux-x64
+            output_name: AICharacterChat-linux-x64
+          - os: macos-latest
+            rid: osx-x64
+            output_name: AICharacterChat-osx-x64
+            
+    # Môi trường để chạy job, lấy từ ma trận ở trên
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    # Step 1: Checkout mã nguồn từ repository
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    # Step 2: Cài đặt .NET SDK phiên bản 8.0
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x
+
+    # Step 3: Tạo file appsettings.json từ GitHub Secret
+    # Đây là bước quan trọng để đưa API Key vào ứng dụng một cách an toàn
+    - name: Create appsettings.json
+      run: |
+        echo '{
+          "GeminiApi": {
+            "ApiKey": "${{ secrets.GEMINI_API_KEY }}",
+            "ApiUrl": "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent"
+          },
+          "ConnectionStrings": {
+            "DefaultConnection": "Data Source=chat_database.db"
+          }
+        }' > AICharacterChat.UI/appsettings.json
+      shell: bash
+
+    # Step 4: Khôi phục các gói NuGet cần thiết cho dự án
+    - name: Restore dependencies
+      run: dotnet restore AICharacterChatPlatform.sln
+
+    # Step 5: Build toàn bộ solution ở chế độ Release
+    - name: Build
+      run: dotnet build --configuration Release --no-restore AICharacterChatPlatform.sln
+
+    # (Tùy chọn) Step 6: Chạy Unit Tests nếu có
+    # - name: Test
+    #   run: dotnet test --no-build --verbosity normal
+
+    # Step 7: Đóng gói ứng dụng (Publish)
+    # Lệnh này sẽ tạo ra một thư mục chứa tất cả các file cần thiết để chạy ứng dụng
+    - name: Publish Application
+      run: dotnet publish AICharacterChat.UI/AICharacterChat.UI.csproj --configuration Release --runtime ${{ matrix.rid }} --self-contained true -p:PublishSingleFile=true -o ./publish/${{ matrix.output_name }}
+      
+    # Step 8: Nén thư mục đã publish thành file .zip (cho Windows) hoặc .tar.gz (cho Linux/macOS)
+    - name: Archive production artifacts (Windows)
+      if: runner.os == 'Windows'
+      run: Compress-Archive -Path ./publish/${{ matrix.output_name }}/* -DestinationPath ./publish/${{ matrix.output_name }}.zip
+
+    - name: Archive production artifacts (Linux/macOS)
+      if: runner.os != 'Windows'
+      run: tar -czvf ./publish/${{ matrix.output_name }}.tar.gz -C ./publish/${{ matrix.output_name }}/ .
+      
+    # Step 9: Tải lên các file đã nén như một "artifact" của workflow
+    # Artifacts là các file được tạo ra trong quá trình chạy, có thể được tải về sau khi workflow hoàn tất
+    - name: Upload build artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ matrix.output_name }}
+        path: ./publish/${{ matrix.output_name }}.*
+
+    # Step 10: Tạo GitHub Release và đính kèm các file build
+    # Bước này chỉ chạy khi có push trực tiếp vào nhánh `main` (không chạy cho pull request)
+    # và chỉ chạy một lần trên máy ảo Windows để tránh tạo nhiều release trùng lặp.
+    - name: Create GitHub Release
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main' && runner.os == 'Windows'
+      uses: softprops/action-gh-release@v2
+      with:
+        # Tự động tạo các bản nháp release, bạn có thể vào chỉnh sửa và publish sau
+        draft: true
+        # Tự động tạo changelog dựa trên các commit
+        generate_release_notes: true
+        # Đính kèm tất cả các file zip và tar.gz trong thư mục publish
+        files: |
+          ./publish/*.zip
+          ./publish/*.tar.gz
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
